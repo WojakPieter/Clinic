@@ -25,3 +25,14 @@ class NoteSerializer(serializers.ModelSerializer):
         return UserSerializer(obj.patient).data
     def get_doctor(self, obj):
         return UserSerializer(obj.doctor).data
+
+class VisitSerializer(serializers.ModelSerializer):
+    patient = serializers.SerializerMethodField()
+    doctor = serializers.SerializerMethodField()
+    class Meta:
+        model = Visit
+        fields = ('id', 'date', 'hour', 'patient', 'doctor')
+    def get_patient(self, obj):
+        return UserSerializer(obj.patient).data
+    def get_doctor(self, obj):
+        return UserSerializer(obj.doctor).data

@@ -43,7 +43,7 @@ export default {
     mounted() {
         this.loadUser(() => {
             if (this.user.role.name !== "lekarz") {
-                this.$router.push("/");
+                this.$router.push("/start_page");
             }
             else {
                 this.loadPatients();

@@ -62,7 +62,6 @@ export default {
         }
     },
     mounted() {
-        console.log(this.$cookies.get("refreshToken"));
         this.loadUser(() => {
             this.loadNotes();
         })

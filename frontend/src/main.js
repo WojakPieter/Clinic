@@ -10,13 +10,17 @@ import RegisterScreen from "./components/RegisterScreen.vue"
 import StartPage from "./components/StartPage.vue"
 import MedicalNotes from "./components/MedicalNotes.vue"
 import AddNote from "./components/AddNote.vue"
+import Visits from "./components/Visits.vue"
+import AddVisit from "./components/AddVisit.vue"
 
 const routes = [
     { path: '/', component: LoggingScreen },
     { path: '/register', component: RegisterScreen },
     { path: '/start_page', component: StartPage },
     { path: '/medical_notes', component: MedicalNotes },
-    { path: '/add_note', component: AddNote }
+    { path: '/add_note', component: AddNote },
+    { path: '/visits', component: Visits },
+    { path: '/add_visit', component: AddVisit },
 ];
 
 const router = createRouter({
@@ -118,6 +122,31 @@ app.mixin({
                     if (error.response.data && error.response.data.message == "JWT Token expired") {
                         this.refreshToken(() => {
                             this.putRequest(url, data, _thenHandler, _catchHandler);
+                        })
+                    }
+                    else {
+                        console.log(error);
+                        _catchHandler(error);
+                    }
+                });
+        },
+        deleteRequest(url, _thenHandler, _catchHandler) {
+            const headers = {
+                accept: "application/json",
+                Authorization: "Bearer " + window.localStorage.getItem("token"),
+            };
+            this.requestProcessing = true;
+            this.axios
+                .delete('http://127.0.0.1:8000/' + url, { headers })
+                .then((response) => {
+                    this.requestProcessing = false;
+                    _thenHandler(response);
+                })
+                .catch((error) => {
+                    this.requestProcessing = false;
+                    if (error.response.data && error.response.data.message == "JWT Token expired") {
+                        this.refreshToken(() => {
+                            this.deleteRequest(url, _thenHandler, _catchHandler);
                         })
                     }
                     else {

@@ -21,6 +21,7 @@ JWT_TOKEN_VALIDITY = 1
 REFRESH_TOKEN_VALIDITY = 24
 PATIENT_ROLE = "pacjent"
 DOCTOR_ROLE = "lekarz"
+MEDICAL_WORKER_ROLE = "pracownik medyczny"
 
 def generate_tokens(login, role):
     module_dir = os.path.dirname(__file__)
@@ -52,7 +53,6 @@ def generate_tokens(login, role):
         algorithm="RS256"
     )
     pem_bytes_file.close()
-    RefreshToken(token=refresh_token).save()
     return token, refresh_token
 
 def validate_token(token):
@@ -165,8 +165,11 @@ class RefreshTokenView(APIView):
             if decoded == "expired" or decoded == False:
                 return Response(status.HTTP_401_UNAUTHORIZED)
             if decoded['refresh'] == True:
+                if RefreshToken.objects.filter(token=refresh_token).count() > 0:
+                    return Response(status=status.HTTP_410_GONE)
                 new_token, new_refresh_token = generate_tokens(decoded['login'], decoded['role'])
                 res = HttpResponse(new_token)
+                RefreshToken(token=refresh_token).save()
                 res.set_cookie("refreshToken", new_refresh_token, httponly=True, secure=True, expires="1d", samesite=None)
                 return res
             return Response(status=status.HTTP_401_UNAUTHORIZED)
@@ -223,6 +226,29 @@ class GetPatientsView(APIView):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
         except KeyError:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
+class GetDoctorsView(APIView):
+    def get(self, request):
+        headers = request.headers
+        try:
+            if headers.get('Authorization')[0:7] != "Bearer ":
+                raise KeyError
+            token = headers.get('Authorization')[7:]
+            decoded = decode_token(token)
+            if decoded == "expired":
+                response = {"message": "JWT Token expired"}
+                return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+            if decoded == False:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            if decoded["role"] == PATIENT_ROLE:
+                role = Role.objects.get(name=DOCTOR_ROLE)
+                doctors = User.objects.filter(role=role)
+                serializer = UserSerializer(doctors, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+        except KeyError:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 class AddNoteView(APIView):
     def put(self, request):
@@ -250,5 +276,74 @@ class AddNoteView(APIView):
                 return Response(status=status.HTTP_200_OK)
             else:
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
+        except KeyError:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+class VisitView(APIView):
+    def get(self, request):
+        headers = request.headers
+        try:
+            if headers.get('Authorization')[0:7] != "Bearer ":
+                raise KeyError
+            token = headers.get('Authorization')[7:]
+            decoded = decode_token(token)
+            if decoded == "expired":
+                response = {"message": "JWT Token expired"}
+                return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+            if decoded == False:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            user = User.objects.get(login=decoded["login"])
+            if decoded["role"] == DOCTOR_ROLE:
+                visits = Visit.objects.filter(doctor=user)
+            elif decoded["role"] == PATIENT_ROLE:
+                visits = Visit.objects.filter(patient=user)
+            else:
+                visits = Visit.objects.all()
+            serializer = VisitSerializer(visits, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except KeyError:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+    def put(self, request):
+        headers = request.headers
+        body = json.loads(request.body)
+        try:
+            if headers.get('Authorization')[0:7] != "Bearer ":
+                raise KeyError
+            token = headers.get('Authorization')[7:]
+            decoded = decode_token(token)
+            if decoded == "expired":
+                response = {"message": "JWT Token expired"}
+                return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+            if decoded == False:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            if decoded["role"] != PATIENT_ROLE:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            user = User.objects.get(login=decoded["login"])
+            if User.objects.filter(login=decoded["login"]).count() == 0:
+                return Response({"message": "Nie ma takiego lekarza"}, status=status.HTTP_400_BAD_REQUEST)
+            doctor = User.objects.get(login=body["visitDoctor"])
+            Visit(doctor=doctor, patient=user, date=body["date"], hour=body["hour"]).save()
+            return Response(status=status.HTTP_200_OK)
+        except KeyError:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+    def delete(self, request, pk):
+        headers = request.headers
+        try:
+            if headers.get('Authorization')[0:7] != "Bearer ":
+                raise KeyError
+            token = headers.get('Authorization')[7:]
+            decoded = decode_token(token)
+            if decoded == "expired":
+                response = {"message": "JWT Token expired"}
+                return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+            if decoded == False:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            if Visit.objects.filter(pk=pk).count() == 0:
+                return Response({"message": "Nie odnaleziono takiej wizyty"}, status=status.HTTP_400_BAD_REQUEST)
+            visit = Visit.objects.get(pk=pk)
+            if visit.patient.login == decoded["login"] or visit.doctor.login == decoded["login"] or decoded["role"] == MEDICAL_WORKER_ROLE:
+                visit.delete()
+                return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         except KeyError:
             return Response(status=status.HTTP_401_UNAUTHORIZED)

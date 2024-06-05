@@ -18,3 +18,9 @@ class Note(models.Model):
 
 class RefreshToken(models.Model):
     token = models.TextField()
+
+class Visit(models.Model):
+    patient = models.ForeignKey(User, related_name="visit_patient", on_delete=models.CASCADE, blank=True, null=True)
+    doctor = models.ForeignKey(User, related_name="visit_doctor", on_delete=models.CASCADE, blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    hour = models.IntegerField(blank=True, null=True)
