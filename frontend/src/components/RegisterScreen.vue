@@ -50,6 +50,10 @@ export default {
     },
     methods: {
         register() {
+            if (this.password !== this.repeatPassword) {
+                this.errorMessage = "Hasła nie są takie same";
+                return;
+            }
             this.postRequest("register/", {
                 login: this.login,
                 password: this.password,

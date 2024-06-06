@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "v-idle": "^1.0.3",
+    "v-idle-3": "^0.3.3",
     "vue": "^3.4.21",
     "vue-axios": "^3.5.2",
     "vue-cookies": "^1.8.4",

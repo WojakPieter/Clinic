@@ -5,6 +5,7 @@ import App from './App.vue'
 import VueAxios from "vue-axios"
 import VueCookies from "vue-cookies"
 import axios from "axios"
+import VIdle from "v-idle"
 import LoggingScreen from "./components/LoggingScreen.vue"
 import RegisterScreen from "./components/RegisterScreen.vue"
 import StartPage from "./components/StartPage.vue"
@@ -43,6 +44,7 @@ axios.interceptors.request.use(
 app.provide("axios", app.config.globalProperties.axios);
 app.use(VueAxios, axios);
 app.use(VueCookies);
+app.use(VIdle);
 app.use(router);
 app.mixin({
     data() {
@@ -53,7 +55,7 @@ app.mixin({
         }
     },
     methods: {
-        getRequest(url, _thenHandler, _catchHandler) {
+        getRequest(url, _thenHandler, _catchHandler = () => {}) {
             const headers = {
                 accept: "application/json",
                 Authorization: "Bearer " + window.localStorage.getItem("token"),
@@ -62,12 +64,10 @@ app.mixin({
             this.axios
                 .get('http://127.0.0.1:8000/' + url, { headers })
                 .then((response) => {
-                    console.log(response);
                     this.requestProcessing = false;
                     _thenHandler(response);
                 })
                 .catch((error) => {
-                    console.log(error);
                     this.requestProcessing = false;
                     if (error.response.data && error.response.data.message == "JWT Token expired") {
                         this.refreshToken(() => {
@@ -80,7 +80,7 @@ app.mixin({
                     
                 });
         },
-        postRequest(url, data, _thenHandler, _catchHandler) {
+        postRequest(url, data, _thenHandler, _catchHandler = () => {}) {
             const headers = {
                 accept: "application/json",
                 Authorization: "Bearer " + window.localStorage.getItem("token"),
@@ -105,7 +105,7 @@ app.mixin({
                     }
                 });
         },
-        putRequest(url, data, _thenHandler, _catchHandler) {
+        putRequest(url, data, _thenHandler, _catchHandler = () => {}) {
             const headers = {
                 accept: "application/json",
                 Authorization: "Bearer " + window.localStorage.getItem("token"),
@@ -125,12 +125,11 @@ app.mixin({
                         })
                     }
                     else {
-                        console.log(error);
                         _catchHandler(error);
                     }
                 });
         },
-        deleteRequest(url, _thenHandler, _catchHandler) {
+        deleteRequest(url, _thenHandler, _catchHandler = () => {}) {
             const headers = {
                 accept: "application/json",
                 Authorization: "Bearer " + window.localStorage.getItem("token"),
@@ -150,7 +149,6 @@ app.mixin({
                         })
                     }
                     else {
-                        console.log(error);
                         _catchHandler(error);
                     }
                 });
@@ -175,7 +173,6 @@ app.mixin({
                 this.user = response.data;
                 _callback();
             }, (error) => {
-                console.log(error);
                 this.$router.push("/");
             }) 
         },
@@ -183,6 +180,12 @@ app.mixin({
             this.getRequest("patients/", (response) => {
                 this.patients = response.data;
                 _callback();
+            })
+        },
+        logout(_callback = () => {}) {
+            this.postRequest("logout/", {}, () => {
+                window.localStorage.removeItem("token");
+                this.$router.push("/");
             })
         }
     },

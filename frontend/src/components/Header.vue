@@ -2,7 +2,7 @@
     <div class="header">
         <p>Witaj {{ this.user.login }}</p>
         <router-link to="/start_page"><button>Strona główna</button></router-link>
-        <button @click="this.logOut()">Wyloguj się</button>
+        <button @click="this.logout()">Wyloguj się</button>
     </div>
 </template>
 
@@ -15,11 +15,6 @@ export default {
         }
     },
     methods: {
-        logOut() {
-            window.localStorage.removeItem("token");
-            this.isLoggedOut = true;
-            this.$router.push("/");
-        },
         isLoggedIn() {
             return window.localStorage.getItem("token");
         }

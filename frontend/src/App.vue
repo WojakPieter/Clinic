@@ -1,5 +1,15 @@
 <template>
   <Header v-if="this.headerDisplay" />
+  <v-idle
+    v-if="
+      this.$route.path != '/' &&
+      this.$route.path != '/register_screen'
+    "
+    v-show="false"
+    :duration="5"
+    @idle="this.logout()"
+  >
+  </v-idle>
   <router-view></router-view>
 </template>
 
@@ -20,6 +30,7 @@
 
 <script>
 import Header from './components/Header.vue';
+import VIdle from "v-idle"
 
 export default {
   data() {
@@ -29,7 +40,8 @@ export default {
     }
   },
   components: {
-    Header
+    Header,
+    VIdle
   },
   watch: {
       $route() {

@@ -1,5 +1,5 @@
 <template>
-    <div class="medical-notes">
+    <div v-if="this.user.role?.name !== 'personel medyczny'" class="medical-notes">
         <div v-if="this.viewingNote" class="overlay">
             <div class="overlay-content">
                 <p>{{ this.viewedNote.content }}</p>

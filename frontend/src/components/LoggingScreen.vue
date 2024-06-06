@@ -38,11 +38,9 @@ export default {
                     login: this.login,
                     password: this.password
                 }, (response) => {
-                    console.log(response);
                     window.localStorage.setItem('token', response.data);
                     this.$router.push("/start_page");
                 }, (error) => {
-                    console.log(error);
                     this.errorMessage = "Nieprawidłowe dane";
                 })
             }

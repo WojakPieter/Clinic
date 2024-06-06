@@ -1,5 +1,5 @@
 <template>
-    <div class="add-visit">
+    <div v-if="this.user.role?.name === 'pacjent'" class="add-visit">
         <p style="color: red" v-if="this.errorMessage">{{ this.errorMessage }}</p>
         <label>
             Wybierz lekarza:
@@ -27,6 +27,7 @@
         <br />
         <button @click="this.addVisit()">Zatwierdź</button>
     </div>
+    <i v-else>Nie masz uprawnień do odwiedzenia tej strony</i>
 </template>
 
 <script>
@@ -35,6 +36,7 @@ export default {
         return {
             doctors: [],
             errorMessage: "",
+            user: {},
             visitDate: "",
             visitDoctor: "",
             visitHour: 8
@@ -61,7 +63,9 @@ export default {
         }
     },
     mounted() {
-        this.loadDoctors();
+        this.loadUser(() => {
+            this.loadDoctors();
+        })
     }
 }
 </script>

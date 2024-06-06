@@ -169,6 +169,8 @@ class RefreshTokenView(APIView):
                     return Response(status=status.HTTP_410_GONE)
                 new_token, new_refresh_token = generate_tokens(decoded['login'], decoded['role'])
                 res = HttpResponse(new_token)
+                if RefreshToken.objects.filter(token=refresh_token).count() > 0:
+                    return Response(status=status.HTTP_401_UNAUTHORIZED)
                 RefreshToken(token=refresh_token).save()
                 res.set_cookie("refreshToken", new_refresh_token, httponly=True, secure=True, expires="1d", samesite=None)
                 return res
@@ -345,5 +347,24 @@ class VisitView(APIView):
                 visit.delete()
                 return Response(status=status.HTTP_200_OK)
             return Response(status=status.HTTP_401_UNAUTHORIZED)
+        except KeyError:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+class LogoutView(APIView):
+    def post(self, request):
+        headers = request.headers
+        refresh_token = request.COOKIES['refreshToken']
+        try:
+            if headers.get('Authorization')[0:7] != "Bearer ":
+                raise KeyError
+            token = headers.get('Authorization')[7:]
+            decoded = decode_token(token)
+            if decoded == "expired":
+                response = {"message": "JWT Token expired"}
+                return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+            if decoded == False:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            RefreshToken(token=refresh_token).save()
+            return Response(status=status.HTTP_200_OK)
         except KeyError:
             return Response(status=status.HTTP_401_UNAUTHORIZED)

@@ -2,14 +2,14 @@
     <div class="visits">
         <p style="color: red" v-if="this.errorMessage">{{ this.errorMessage }}</p>
         <div class="patient-visits">
-            <router-link to="/add_visit">
+            <router-link v-if="this.user.role?.name === 'pacjent'" to="/add_visit">
                 <button>Umów się</button>
             </router-link>
             <br />
             <table v-if="this.visits.length">
                 <tr>
-                    <th v-if="this.user?.role?.name === 'pacjent'">Lekarz</th>
-                    <th v-if="this.user?.role?.name === 'lekarz'">Pacjent</th>
+                    <th v-if="this.user?.role?.name !== 'lekarz'">Lekarz</th>
+                    <th v-if="this.user?.role?.name !== 'pacjent'">Pacjent</th>
                     <th>Data</th>
                     <th></th>
                 </tr>

@@ -1,5 +1,5 @@
 <template>
-    <div class="add-note">
+    <div v-if="this.user.role?.name === 'lekarz'" class="add-note">
         <label>
             Wybierz pacjenta
             <select v-model="notePatient">
@@ -18,6 +18,7 @@
         <br />
         <button @click="this.addNote()">Dodaj</button>
     </div>
+    <i v-else>Nie masz uprawnień do odwiedzenia tej strony</i>
 </template>
 
 <script>
