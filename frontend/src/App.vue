@@ -6,7 +6,7 @@
       this.$route.path != '/register_screen'
     "
     v-show="false"
-    :duration="5"
+    :duration="900"
     @idle="this.logout()"
   >
   </v-idle>
