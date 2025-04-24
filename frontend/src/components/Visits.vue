@@ -36,7 +36,7 @@ export default {
     },
     methods: {
         cancelVisit(id) {
-            this.deleteRequest("visit/" + id, () => {
+            this.deleteRequest("visit/" + id + "/", () => {
                 this.loadVisits();
             }, (error) => {
                 this.errorMessage = error?.response?.data?.message;

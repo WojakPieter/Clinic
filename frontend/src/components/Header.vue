@@ -1,33 +1,10 @@
 <template>
     <div class="header">
-        <p>Witaj {{ this.user.login }}</p>
+        <p>Witaj <span id="user-login"></span></p>
         <router-link to="/start_page"><button>Strona główna</button></router-link>
         <button @click="this.logout()">Wyloguj się</button>
     </div>
 </template>
-
-<script>
-export default {
-    data() {
-        return {
-            display: false,
-            user: {},
-        }
-    },
-    methods: {
-        isLoggedIn() {
-            return window.localStorage.getItem("token");
-        }
-    },
-    
-    mounted() {
-        setTimeout(() => {
-            if (this.isLoggedIn())
-                this.loadUser();
-        }, 800)
-    },
-}
-</script>
 
 <style scoped>
 .header {

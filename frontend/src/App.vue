@@ -45,9 +45,7 @@ export default {
   },
   watch: {
       $route() {
-          this.headerDisplay = window.localStorage.getItem("token")?.length > 0;
-          if (this.headerDisplay)
-            this.loadUser();
+        this.headerDisplay = window.localStorage.getItem("token")?.length > 0 && this.$route != "";
       },
   },  
 }

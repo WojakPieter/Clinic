@@ -69,7 +69,7 @@ app.mixin({
                 })
                 .catch((error) => {
                     this.requestProcessing = false;
-                    if (error.response.data && error.response.data.message == "JWT Token expired") {
+                    if (error?.response?.data && error?.response?.data?.message == "JWT Token expired") {
                         this.refreshToken(() => {
                             this.getRequest(url, _thenHandler, _catchHandler);
                         })
@@ -95,7 +95,7 @@ app.mixin({
                 })
                 .catch((error) => {
                     this.requestProcessing = false;
-                    if (error.response.data && error.response.data.message == "JWT Token expired") {
+                    if (error?.response?.data && error?.response?.data?.message == "JWT Token expired") {
                         this.refreshToken(() => {
                             this.postRequest(url, data, _thenHandler, _catchHandler);
                         })
@@ -119,7 +119,7 @@ app.mixin({
                 })
                 .catch((error) => {
                     this.requestProcessing = false;
-                    if (error.response.data && error.response.data.message == "JWT Token expired") {
+                    if (error?.response?.data && error?.response?.data?.message == "JWT Token expired") {
                         this.refreshToken(() => {
                             this.putRequest(url, data, _thenHandler, _catchHandler);
                         })
@@ -171,6 +171,7 @@ app.mixin({
         loadUser(_callback = () => {}) {
             this.getRequest("user/", (response) => {
                 this.user = response.data;
+                document.getElementById("user-login").innerHTML = this.user.login;
                 _callback();
             }, (error) => {
                 this.$router.push("/");
