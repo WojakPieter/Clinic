@@ -22,5 +22,5 @@ python manage.py runserver
 
 ```
 npm install
-npm start
+npm run dev
 ```
