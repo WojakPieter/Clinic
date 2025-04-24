@@ -1,3 +1,6 @@
+Academic project implementing JWT authentication mechanism in Python Django framework. Very simple application featuring adding patients, doctors, making appoinments and adding medical notes by doctors.
+For more information, checkout the documentation.
+
 Installation guide
 
 ```
